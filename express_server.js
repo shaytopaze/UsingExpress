@@ -1,3 +1,4 @@
+const fs = require('fs');
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 8080; // default port 8080
@@ -47,6 +48,8 @@ app.get("/urls/:id", (req, res) => {
     longURL: urlDatabase[req.params.id]
   };
   res.render("urls_show", templateVars);
+  fs.appendFile('urlDatabase.txt', templateVars['shortURL'] + ' : ' + templateVars['longURL'] + '\n');
+
 });
 
 app.get("/u/:shortURL", (req, res) => {
