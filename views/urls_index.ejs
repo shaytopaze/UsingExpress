@@ -6,12 +6,14 @@
 </head>
 <body>
 <%-include('partials/_header.ejs') %>
-     <table> <% for (key in urls) { %>
+     <table> <% for (url in urls) { %>
       <tr><td>
-      <%= key %>
+      <%= url %>
       </td>
       <td>
-     <%= urls[key] %>
+        <br>
+     <%= urls[url] %>
+     <form method="POST" action="/urls/9sm5xK/delete"><button type="button">Delete!</button></form>
       </td></tr>
      <% } %></table>
     <a href="#" target=_blank>Create new short url</a>
