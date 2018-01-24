@@ -7,6 +7,15 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+const urlDatabase = {
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
+};
+
+function deleteUrlDatabase(shortURL) {
+  delete urlDatabase[shortURL];
+}
+
 function generateRandomString() {
   let text = "";
   const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -16,10 +25,6 @@ function generateRandomString() {
   return text;
 }
 
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
 
 app.get("/", (req, res) => {
   res.end("Hello!");
@@ -58,7 +63,6 @@ app.get("/urls/:id", (req, res) => {
 
   res.render("urls_show", templateVars);
   fs.appendFile('urlDatabase.txt', templateVars['shortURL'] + ' : ' + templateVars['longURL'] + '\n');
-
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -67,13 +71,20 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  delete templateVars.shortURL;
-  delete templateVars.longURL;
-}
+  deleteUrlDatabase(req.params.id);
+  res.redirect("/urls");
+});
+
+app.post("/urls/:id", (req, res) => {
+  urlDatabase[req.params.id] = req.body.longURL;
+  res.redirect("/urls");
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+
 
 
 

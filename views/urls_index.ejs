@@ -13,10 +13,10 @@
       <td>
         <br>
      <%= urls[url] %>
-     <form method="POST" action="/urls/9sm5xK/delete"><button type="button">Delete!</button></form>
+     <form method="POST" action="/urls/<%=url%>/delete"><button type="submit">🗑️</button></form>
       </td></tr>
      <% } %></table>
-    <a href="#" target=_blank>Create new short url</a>
+    <a href="urls/new">Create new short url</a>
 
 </body>
 </html>
