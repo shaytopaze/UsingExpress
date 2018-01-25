@@ -14,6 +14,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const userDatabase = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
+
 function deleteUrlDatabase(shortURL) {
   delete urlDatabase[shortURL];
 }
@@ -27,13 +40,89 @@ function generateRandomString() {
   return text;
 }
 
-app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
+function findUser_byEmail(email) {
+  let foundUser = undefined;
+  for (var userId in userDatabase) {
+    if (userDatabase[userId].email === email) {
+      foundUser = userDatabase[userId];
+      break;
+    }
+  }
+  return foundUser;
+}
+
+function findUserInUserDatabase(userInfo) {
+  let foundUser = ""
+  for (var user in userDatabase) {
+   if (userDatabase[user]) {
+      return true;
+    } else {
+      return false;
+    }
+}
+}
+
+app.use(function(req, res, next) {
+  res.locals.userID = req.cookies.userID || false;    // Middleware
+  next();
+});
+
+app.get("/register", (req, res) => {
+
+  res.render("urls_register", {userDatabase: userDatabase, userID: req.cookies.userID});
+
+});
+
+app.post('/register', (req, res) => {
+  let submittedEmail = req.body.email;
+  let submittedPassword = req.body.password;
+
+  if (!(submittedEmail && submittedPassword)) {
+    res.statusCode = 400;
+    res.end("You must enter a valid email address and password to register.")
+  }
+  if (findUser_byEmail(submittedEmail)) {
+    res.statusCode = 400;
+    res.end("The email you entered is already registered with an account.");
+  } else {
+    let userRandomID = generateRandomString();
+    res.cookie('userID', userRandomID);
+    userDatabase[userRandomID] = {
+      "id": userRandomID,
+      "email": submittedEmail,
+      "password": submittedPassword
+      }
+    }
   res.redirect("/urls");
 });
 
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+app.post("/login", (req, res) => {
+  let user = findUser_byEmail(req.body.email);
+  if (!user) {
+    res.statusCode = 403;
+    res.end("The email you entered has not been registered");
+  } else if (user.password !== req.body.password)  {
+    console.log(user.password);
+    console.log(req.body.password);
+    res.statusCode = 403;
+    res.end("Incorrect Password");
+  } else {
+    res.cookie('userID', user.id);
+    res.redirect("/");
+  }
+});
+
+
+  // res.cookie('userID', req.body.userID);
+  // res.redirect("/urls");
+
+
 app.post("/logout", (req, res) => {
-  res.clearCookie('username', req.body.username);
+  res.clearCookie('userID');
   res.redirect("/urls");
 });
 
@@ -52,7 +141,7 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
-    username: req.cookies.username
+    userID: req.cookies.userID
   };
   res.render("urls_index", templateVars);
 });
@@ -71,7 +160,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
-    username: req.cookies.username,
+    userID: req.cookies.userID,
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
@@ -98,6 +187,9 @@ app.post("/urls/:id", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+
+
 
 
 
