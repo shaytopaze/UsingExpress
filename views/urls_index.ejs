@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +5,8 @@
 </head>
 <body>
 <%-include('partials/_header.ejs') %>
-     <table> <% for (url in urls) { %>
+     <table>
+<% for (url in urls) { %>
       <tr><td>
       <%= url %>
       </td>
@@ -15,7 +15,7 @@
      <%= urls[url] %>
      <form method="POST" action="/urls/<%=url%>/delete"><button type="submit">🗑️</button></form>
       </td></tr>
-     <% } %></table>
+     <% } %> </table>
     <a href="urls/new">Create new short url</a>
 
 </body>
