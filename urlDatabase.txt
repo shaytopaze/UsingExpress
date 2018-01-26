@@ -34,3 +34,5 @@ ognAEs : new uRL
 4ZztqY : TESTING
 BOKlcz : URL
 GCBmMQ : new
+register : undefined
+login : undefined
