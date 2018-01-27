@@ -4,19 +4,24 @@
   <title>TinyApp</title>
 </head>
 <body>
-<%-include('partials/_header.ejs') %>
-     <table>
-<% for (url in urls) { %>
-      <tr><td>
-      <%= url %>
-      </td>
-      <td>
-        <br>
-     <%= urls[url] %>
-     <form method="POST" action="/urls/<%=url%>/delete"><button type="submit">🗑️</button></form>
-      </td></tr>
-     <% } %> </table>
-    <a href="urls/new">Create new short url</a>
+  <%-include('partials/_header.ejs') %>
+  <table>
+    <% for (var url in urls) { %>
+      <tr>
+        <td>
+          <%= url %>
+        </td>
+        <td>
+          <br>
+          <%= urls[url].longURL %>
+          <form method="POST" action="/urls/<%=url%>/delete">
+            <button type="submit">🗑️</button>
+          </form>
+        </td>
+      </tr>
+    <% } %>
+  </table>
+  <a href="urls/new">Create new short url</a>
 
 </body>
 </html>

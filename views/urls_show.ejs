@@ -8,10 +8,10 @@
    <h3> USER-ID: </h3> <h3>
    <h3><%= userID %></h3>
    <p><%= shortURL %></p>
-   <p><%= longURL %></p>
+   <p><%= longURL.longURL %></p>
    <!-- <pre><%= JSON.stringify(longURL, null, 2) %></pre> -->
   <form method="POST" action="/urls/<%=shortURL%>">
-  <input id="longURL" type="text" name="longURL" placeholder="Update" style="width: 300px" value="<%= url.longURL%>"/>
+  <input id="longURL" type="text" name="longURL" placeholder="Update" style="width: 300px" value="<%=longURL.longURL%>"/>
   <button type="submit">Update!</button>
   </form>
 </body>

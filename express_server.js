@@ -10,8 +10,16 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 const urlDatabase = {
-  "b2xVn2": { url: "http://www.lighthouselabs.ca", userId: "userRandomID" },
-  "9sm5xK": { url: "http://www.google.com", userId: "userRandomID" }
+  "b2xVn2": {
+    shortURL: "b2xVn2",
+    longURL: "http://www.lighthouselabs.ca",
+    userId: "userRandomID"
+  },
+  "9sm5xK": {
+    shortURL: "9sm5xK",
+    longURL: "http://www.google.com",
+    userId: "userRandomID"
+  }
 };
 
 const userDatabase = {
@@ -41,7 +49,7 @@ function generateRandomString() {
 }
 
 function findUser_byEmail(email) {
-  let foundUser = undefined;
+  let foundUser;
   for (var userId in userDatabase) {
     if (userDatabase[userId].email === email) {
       foundUser = userDatabase[userId];
@@ -49,6 +57,22 @@ function findUser_byEmail(email) {
     }
   }
   return foundUser;
+}
+
+function getUrlsForUser(userID) {
+  let foundUrls = {};
+  for (var shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === userID) {
+      foundUrls[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return foundUrls;
+}
+
+function accessToShortURL() {
+  for (var shortURL in urlDatabase) {
+    return shortURL;
+  }
 }
 
 app.use(function(req, res, next) {
@@ -60,6 +84,7 @@ const isUserLoggedIn = (req, res, next) => {
   if (req.cookies.userID) {
     next();
   } else {
+    // alert("You need to register or login first!");
     res.redirect("/login")
   }
 }
@@ -76,11 +101,11 @@ app.post('/register', (req, res) => {
 
   if (!(submittedEmail && submittedPassword)) {
     res.statusCode = 400;
-    res.end("You must enter a valid email address and password to register.")
+    res.end("<html><body>You must enter a valid email address and password to register. <a href='/register'>Register</a></body></html>")
   }
   if (findUser_byEmail(submittedEmail)) {
     res.statusCode = 400;
-    res.end("The email you entered is already registered with an account.");
+    res.end("The email you entered is already registered with an account. <a href='/register'>Register</a></body></html>");
   } else {
     let userRandomID = generateRandomString();
     res.cookie('userID', userRandomID);
@@ -115,29 +140,13 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie('userID');
-  res.redirect("/urls");
+  res.redirect("/");
 });
 
 app.get("/", (req, res) => {
   // res.end("Hello!");
   res.redirect('/urls');
 });
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.end("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-app.get("/urls", (req, res) => {
-  let templateVars = {
-    urls: urlDatabase,
-  };
-  res.render("urls_index", templateVars);
-});
-
 
 app.param('shortURL', (req, res, next, shortURL) => {
   const longURL = urlDatabase[shortURL];
@@ -146,24 +155,32 @@ app.param('shortURL', (req, res, next, shortURL) => {
   next();
 });
 
+app.get("/urls", isUserLoggedIn, (req, res) => {
+  let templateVars = {
+    urls: getUrlsForUser(req.cookies.userID), accessToShortURLS
+  };
+  res.render("urls_index", templateVars);
+});
+
 app.get("/urls/new", isUserLoggedIn, (req, res) => {
   res.render("urls_new");
 });
 
-app.post("/urls", (req, res) => {
-  console.log(req.body);
-  const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
+app.post("/urls", isUserLoggedIn, (req, res) => {
+  var userID = req.body.userID;
+  var shortURL = generateRandomString();
+  var longURL = req.body.longURL;
+  var userID = req.cookies.userID;
+  urlDatabase[shortURL] = { shortURL: shortURL, longURL: longURL, userID: userID };
   res.redirect(`/urls/${shortURL}`);
 });
 
-app.get("/urls/:shortURL", isUserLoggedIn, (req, res) => {
+app.get("/urls/:shortURL", (req, res) => {
+  res.render("urls_show", { urlDatabase: urlDatabase });
 
-  res.render("urls_show");
-  // fs.appendFile('urlDatabase.txt', templateVars['shortURL'] + ' : ' + templateVars['longURL'] + '\n');
 });
 
-app.get("/u/:shortURL", isUserLoggedIn, (req, res) => {
+app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
@@ -174,7 +191,7 @@ app.post("/urls/:id/delete", isUserLoggedIn, (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
+  urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect("/urls");
 });
 

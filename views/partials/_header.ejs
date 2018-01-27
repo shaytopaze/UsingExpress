@@ -1,26 +1,11 @@
-<h1><a href="/register">Register</a></h1>
-
 <% if(userID) { %>
 <form method="post" action="/logout">
   <button type="submit">Logout</button>
 </form>
 <% } else { %>
+<h1><a href="/register">Register</a></h1>
 <h1><a href="/login">Login</a></h1>
 <%} %>
-
-<!-- <h1> TinyApp </h1>
-<% if (!userID) { %> -->
-  <!-- <h2><%=userID%></h2>
-    <form method="POST" action="/login">
-  <button type="submit">sign out</button>
-  </form>
-<% } else {%>
-  <form method="POST" action="/urls_new">
-  <input type="text" name="userID" placeholder="userID" style="width: 300px">
-  <button type="submit">sign in</button>
-  </form>
-  <%}%>
- -->
 
 
 
