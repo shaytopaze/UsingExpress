@@ -6,11 +6,13 @@ require('dotenv').config();
 app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-const cookieParser = require('cookie-parser');
-app.use(cookieParser());
+var cookieSession = require('cookie-session')
+app.use(cookieSession({
+  name: 'session',
+  keys: [process.env.SECRET_KEY || 'dvelopment']
+}));
+
 const bcrypt = require('bcrypt');
-// const password = "purple-monkey-dinosaur";
-// const hashedPassword = bcrypt.hashSync(password, 10);
 
 const urlDatabase = {
   "b2xVn2": {
@@ -83,12 +85,12 @@ function accessToShortURL(short) {
 }
 
 app.use(function(req, res, next) {
-  res.locals.userID = req.cookies.userID || false;    // Middleware
+  res.locals.userID = req.session.userID || false;    // Middleware
   next();
 });
 
 const isUserLoggedIn = (req, res, next) => {
-  if (req.cookies.userID) {
+  if (req.session.userID) {
     next();
   } else {
     res.redirect("/login")
@@ -112,10 +114,10 @@ app.post('/register', (req, res) => {
   }
   if (findUser_byEmail(submittedEmail)) {
     res.statusCode = 400;
-    res.end("<html><body>The email you entered is already registered with an account. <a href='/register'>Register</a></body></html>");
+    res.end("<html><body>The email you entered is already registered with an account. <a href='/login'>Login</a></body></html>");
   } else {
     let userRandomID = generateRandomString();
-    res.cookie('userID', userRandomID);
+    req.session.userID = userRandomID;
     userDatabase[userRandomID] = {
       "id": userRandomID,
       "email": submittedEmail,
@@ -138,16 +140,16 @@ app.post("/login", (req, res) => {
   }
   if (!bcrypt.compareSync(req.body.password, user.password)) {
     res.statusCode = 403;
-    res.end("<html><body>Incorrect Password. <a href='/login'>Login</a></body></html>");
+    res.end("<html><body>The information you submitted is WRONG! <a href='/login'>Login</a></body></html>");
     return;
   }
-  res.cookie('userID', user.id);
+  req.session.userID = user.id;
   res.redirect("/urls");
 });
 
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('userID');
+  req.session.userID = null;
   res.redirect("/");
 });
 
@@ -164,7 +166,7 @@ app.param('shortURL', (req, res, next, shortURL) => {
 
 app.get("/urls", isUserLoggedIn, (req, res) => {
   let templateVars = {
-    urls: getUrlsForUser(req.cookies.userID),
+    urls: getUrlsForUser(req.session.userID),
   };
   res.render("urls_index", templateVars);
 });
@@ -177,7 +179,7 @@ app.post("/urls", isUserLoggedIn, (req, res) => {
   var userID = req.body.userID;
   var shortURL = generateRandomString();
   var longURL = req.body.longURL;
-  var userID = req.cookies.userID;
+  var userID = req.session.userID;
   urlDatabase[shortURL] = { shortURL: shortURL, longURL: longURL, userID: userID };
   res.redirect(`/urls/${shortURL}`);
 });
