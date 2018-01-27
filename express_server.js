@@ -6,7 +6,7 @@ require('dotenv').config();
 app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-var cookieSession = require('cookie-session')
+var cookieSession = require('cookie-session');
 app.use(cookieSession({
   name: 'session',
   keys: [process.env.SECRET_KEY || 'dvelopment']
@@ -33,7 +33,7 @@ const userDatabase = {
     email: "user@example.com",
     password: "hey"
   },
- "user2RandomID": {
+  "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk"
@@ -53,7 +53,7 @@ function generateRandomString() {
   return text;
 }
 
-function findUser_byEmail(email) {
+function findUserByEmail(email) {
   let foundUser;
   for (var userId in userDatabase) {
     if (userDatabase[userId].email === email) {
@@ -78,14 +78,14 @@ function accessToShortURL(short) {
   let foundUrls;
   for (var key in urlDatabase) {
     if (urlDatabase[key].shortURL === short) {
-       foundUrls = urlDatabase[key].longURL;
+      foundUrls = urlDatabase[key].longURL;
     }
   }
   return foundUrls;
 }
 
 app.use(function(req, res, next) {
-  res.locals.userID = req.session.userID || false;    // Middleware
+  res.locals.userID = req.session.userID || false;
   next();
 });
 
@@ -93,9 +93,9 @@ const isUserLoggedIn = (req, res, next) => {
   if (req.session.userID) {
     next();
   } else {
-    res.redirect("/login")
+    res.redirect("/login");
   }
-}
+};
 
 app.get("/register", (req, res) => {
 
@@ -112,7 +112,7 @@ app.post('/register', (req, res) => {
     res.statusCode = 400;
     res.end("<html><body>You must enter a valid email address and password to register. <a href='/register'>Register</a></body></html>");
   }
-  if (findUser_byEmail(submittedEmail)) {
+  if (findUserByEmail(submittedEmail)) {
     res.statusCode = 400;
     res.end("<html><body>The email you entered is already registered with an account. <a href='/login'>Login</a></body></html>");
   } else {
@@ -122,8 +122,8 @@ app.post('/register', (req, res) => {
       "id": userRandomID,
       "email": submittedEmail,
       "password": submittedPassword
-      }
-    }
+    };
+  }
   res.redirect("/urls");
 });
 
@@ -132,7 +132,7 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  let user = findUser_byEmail(req.body.email);
+  let user = findUserByEmail(req.body.email);
   if (!user) {
     res.statusCode = 403;
     res.end("<html><body>The email you entered has not been registered. <a href='/register'>Register</a></body></html>");
@@ -166,7 +166,7 @@ app.param('shortURL', (req, res, next, shortURL) => {
 
 app.get("/urls", isUserLoggedIn, (req, res) => {
   let templateVars = {
-    urls: getUrlsForUser(req.session.userID),
+    urls: getUrlsForUser(req.session.userID)
   };
   res.render("urls_index", templateVars);
 });
@@ -179,7 +179,7 @@ app.post("/urls", isUserLoggedIn, (req, res) => {
   var userID = req.body.userID;
   var shortURL = generateRandomString();
   var longURL = req.body.longURL;
-  var userID = req.session.userID;
+  userID = req.session.userID;
   urlDatabase[shortURL] = { shortURL: shortURL, longURL: longURL, userID: userID };
   res.redirect(`/urls/${shortURL}`);
 });
