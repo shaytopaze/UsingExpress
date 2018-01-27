@@ -8,6 +8,9 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+const bcrypt = require('bcrypt');
+const password = "purple-monkey-dinosaur"; // you will probably this from req.params
+const hashedPassword = bcrypt.hashSync(password, 10);
 
 const urlDatabase = {
   "b2xVn2": {
@@ -69,10 +72,14 @@ function getUrlsForUser(userID) {
   return foundUrls;
 }
 
-function accessToShortURL() {
-  for (var shortURL in urlDatabase) {
-    return shortURL;
+function accessToShortURL(short) {
+  let foundUrls;
+  for (var key in urlDatabase) {
+    if (urlDatabase[key].shortURL === short) {
+       foundUrls = urlDatabase[key].longURL;
+    }
   }
+  return foundUrls;
 }
 
 app.use(function(req, res, next) {
@@ -101,11 +108,11 @@ app.post('/register', (req, res) => {
 
   if (!(submittedEmail && submittedPassword)) {
     res.statusCode = 400;
-    res.end("<html><body>You must enter a valid email address and password to register. <a href='/register'>Register</a></body></html>")
+    res.end("<html><body>You must enter a valid email address and password to register. <a href='/register'>Register</a></body></html>");
   }
   if (findUser_byEmail(submittedEmail)) {
     res.statusCode = 400;
-    res.end("The email you entered is already registered with an account. <a href='/register'>Register</a></body></html>");
+    res.end("<html><body>The email you entered is already registered with an account. <a href='/register'>Register</a></body></html>");
   } else {
     let userRandomID = generateRandomString();
     res.cookie('userID', userRandomID);
@@ -126,12 +133,12 @@ app.post("/login", (req, res) => {
   let user = findUser_byEmail(req.body.email);
   if (!user) {
     res.statusCode = 403;
-    res.end("The email you entered has not been registered");
+    res.end("<html><body>The email you entered has not been registered. <a href='/register'>Register</a></body></html>");
   } else if (user.password !== req.body.password)  {
     console.log(user.password);
     console.log(req.body.password);
     res.statusCode = 403;
-    res.end("Incorrect Password");
+    res.end("<html><body>Incorrect Password. <a href='/login'>Login</a></body></html>");
   } else {
     res.cookie('userID', user.id);
     res.redirect("/urls");
@@ -157,7 +164,7 @@ app.param('shortURL', (req, res, next, shortURL) => {
 
 app.get("/urls", isUserLoggedIn, (req, res) => {
   let templateVars = {
-    urls: getUrlsForUser(req.cookies.userID), accessToShortURLS
+    urls: getUrlsForUser(req.cookies.userID),
   };
   res.render("urls_index", templateVars);
 });
@@ -181,7 +188,8 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  // const longURL = urlDatabase[req.params.shortURL];
+  const longURL = accessToShortURL(req.params.shortURL);
   res.redirect(longURL);
 });
 
