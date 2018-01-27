@@ -9,8 +9,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 const bcrypt = require('bcrypt');
-const password = "purple-monkey-dinosaur"; // you will probably this from req.params
-const hashedPassword = bcrypt.hashSync(password, 10);
+// const password = "purple-monkey-dinosaur";
+// const hashedPassword = bcrypt.hashSync(password, 10);
 
 const urlDatabase = {
   "b2xVn2": {
@@ -91,7 +91,6 @@ const isUserLoggedIn = (req, res, next) => {
   if (req.cookies.userID) {
     next();
   } else {
-    // alert("You need to register or login first!");
     res.redirect("/login")
   }
 }
@@ -104,7 +103,8 @@ app.get("/register", (req, res) => {
 
 app.post('/register', (req, res) => {
   let submittedEmail = req.body.email;
-  let submittedPassword = req.body.password;
+  let password = req.body.password;
+  let submittedPassword = bcrypt.hashSync(password, 10);
 
   if (!(submittedEmail && submittedPassword)) {
     res.statusCode = 400;
@@ -134,16 +134,17 @@ app.post("/login", (req, res) => {
   if (!user) {
     res.statusCode = 403;
     res.end("<html><body>The email you entered has not been registered. <a href='/register'>Register</a></body></html>");
-  } else if (user.password !== req.body.password)  {
-    console.log(user.password);
-    console.log(req.body.password);
+    return;
+  }
+  if (!bcrypt.compareSync(req.body.password, user.password)) {
     res.statusCode = 403;
     res.end("<html><body>Incorrect Password. <a href='/login'>Login</a></body></html>");
-  } else {
-    res.cookie('userID', user.id);
-    res.redirect("/urls");
+    return;
   }
+  res.cookie('userID', user.id);
+  res.redirect("/urls");
 });
+
 
 app.post("/logout", (req, res) => {
   res.clearCookie('userID');
@@ -151,7 +152,6 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  // res.end("Hello!");
   res.redirect('/urls');
 });
 
@@ -188,7 +188,6 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  // const longURL = urlDatabase[req.params.shortURL];
   const longURL = accessToShortURL(req.params.shortURL);
   res.redirect(longURL);
 });
