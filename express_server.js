@@ -97,6 +97,15 @@ const isUserLoggedIn = (req, res, next) => {
   }
 };
 
+const isUserLoggedInErrorPage = (req, res, next) => {
+  if (req.session.userID) {
+    next();
+  } else {
+    res.statusCode = 400;
+    res.end("<html><body> You must be logged in to access this page! <a href='/login'>Login</a></html></body>")
+  }
+};
+
 app.get("/register", (req, res) => {
 
   res.render("urls_register", {userDatabase: userDatabase });
@@ -164,7 +173,7 @@ app.param('shortURL', (req, res, next, shortURL) => {
   next();
 });
 
-app.get("/urls", isUserLoggedIn, (req, res) => {
+app.get("/urls", isUserLoggedInErrorPage, (req, res) => {
   let templateVars = {
     urls: getUrlsForUser(req.session.userID)
   };
@@ -175,7 +184,7 @@ app.get("/urls/new", isUserLoggedIn, (req, res) => {
   res.render("urls_new");
 });
 
-app.post("/urls", isUserLoggedIn, (req, res) => {
+app.post("/urls", isUserLoggedInErrorPage, (req, res) => {
   var userID = req.body.userID;
   var shortURL = generateRandomString();
   var longURL = req.body.longURL;
@@ -194,12 +203,12 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-app.post("/urls/:id/delete", isUserLoggedIn, (req, res) => {
+app.post("/urls/:id/delete", isUserLoggedInErrorPage, (req, res) => {
   deleteUrlDatabase(req.params.id);
   res.redirect("/urls");
 });
 
-app.post("/urls/:id", (req, res) => {
+app.post("/urls/:id", isUserLoggedInErrorPage, (req, res) => {
   urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect("/urls");
 });

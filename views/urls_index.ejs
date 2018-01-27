@@ -17,10 +17,14 @@
           <form method="POST" action="/urls/<%=url%>/delete">
             <button type="submit">🗑️</button>
           </form>
+            <form method="GET" action="/urls/<%=url%>/">
+            <button type="submit">Edit</button>
+          </form>
         </td>
       </tr>
     <% } %>
   </table>
+  <br>
   <a href="urls/new">Create new short url</a>
 
 </body>
