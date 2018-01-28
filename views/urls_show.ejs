@@ -3,16 +3,13 @@
 <head>
   <title>TinyApp</title>
 </head>
-<body>
+<body style="font-size:20px; padding:50px;">
   <%-include('partials/_header.ejs') %>
-   <h3> USER-ID: </h3> <h3>
-   <h3><%=userID%></h3>
-   <p><a href="/u/<%=shortURL%>"><%= shortURL %></a> <-- Try me out! </p>
-   <p><%= longURL.longURL %></p>
-   <!-- <pre><%= JSON.stringify(longURL, null, 2) %></pre> -->
+  <p><a href="/u/<%=shortURL%>"><%= shortURL %></a> <-- Try me out! </p>
+  <p><%= longURL.longURL %></p>
   <form method="POST" action="/urls/<%=shortURL%>">
-  <input id="longURL" type="text" name="longURL" placeholder="Update" style="width: 300px" value="<%=longURL.longURL%>"/>
-  <button type="submit">Update!</button>
+    <input id="longURL" type="text" name="longURL" placeholder="Update" style="width: 300px" value="<%=longURL.longURL%>"/>
+    <button type="submit">Update!</button>
   </form>
 </body>
 </html>

@@ -1,16 +1,22 @@
-<h1> TinyApp </h1>
-<title>TinyApp</title>
-<h5> Not registered? --> <a href="/register">Register Now!</a> </h5>
-<h2> Login </h2>
-<% if (userID) { %>
+<!DOCTYPE html>
+<html lang="en">
+<head></head>
+<body style="font-size:20px; padding:50px;">
+  <h1> TinyApp </h1>
+  <title>TinyApp</title>
+  <h2> Sign In </h2>
+  <% if (userID) { %>
   <h2><%=userID%></h2>
   <form method="POST" action="/logout">
-  <button type="submit">sign out</button>
+    <button type="submit">sign out</button>
   </form>
-<% } else {%>
+  <% } else {%>
   <form method="POST" action="/login">
     <input type="email" name="email" placeholder="email" style="width: 300px">
     <input type="password" name="password" placeholder="password" style="width: 300px">
     <button type="submit">sign in</button>
   </form>
-<%}%>
+  <%}%>
+  <h5> Not registered? --> <a href="/register">Register Now!</a> </h5>
+</body>
+</html>
